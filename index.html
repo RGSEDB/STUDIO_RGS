@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio Delegado AI - V6.1 Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+    <style>
+        /* --- RESET & VARS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg-dark: #1a1a1a;
+            --panel-bg: #ffffff;
+            --gold: #C9A44C;
+            --gold-hover: #b8923a;
+            --blue-police: #1e3c72;
+            --text-main: #333;
+            --border: #e0e0e0;
+            --radius: 12px;
+            --ai-gradient: linear-gradient(135deg, #4285f4, #9b72cb);
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f0f2f5;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden; 
+        }
+
+        /* --- LAYOUT --- */
+        .app-container {
+            display: grid;
+            grid-template-columns: 450px 1fr;
+            height: 100vh;
+        }
+
+        /* --- SIDEBAR (EDITOR) --- */
+        .editor-sidebar {
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        h1 { font-size: 1.4rem; color: var(--blue-police); font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
+        
+        /* AI SECTION */
+        .ai-box {
+            background: linear-gradient(to right, #f8f9fa, #fff);
+            border: 1px solid #d0d7de;
+            border-left: 4px solid #4285f4;
+            padding: 1.5rem;
+            border-radius: var(--radius);
+        }
+        
+        .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 700; color: #4285f4; }
+        
+        .btn-ai {
+            background: var(--ai-gradient);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 10px;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+        }
+        .btn-ai:hover { opacity: 0.9; transform: scale(0.99); }
+        .btn-ai:disabled { opacity: 0.6; cursor: wait; }
+
+        /* CAPTION BOX (NOVO) */
+        .caption-box {
+            background: #fff;
+            border: 1px dashed #ccc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none; /* Escondido até gerar */
+        }
+        .caption-header {
+            font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 0.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+
+        /* Global Settings Group */
+        .settings-group { background: #f8f9fa; padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); }
+        
+        .input-group { margin-bottom: 1rem; }
+        .input-group label { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: #555; }
+        
+        input, select, textarea {
+            width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 8px;
+            font-family: inherit; font-size: 0.9rem; transition: 0.2s;
+        }
+        input:focus, select:focus, textarea:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201, 164, 76, 0.1); }
+
+        /* Slide Tabs (Navigation) */
+        .slide-tabs {
+            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border); margin-bottom: 1rem;
+        }
+        .slide-tab {
+            min-width: 40px; height: 40px; border-radius: 8px; border: 1px solid #ddd;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 700; cursor: pointer; background: white; color: #666;
+            transition: 0.2s;
+        }
+        .slide-tab.active { background: var(--blue-police); color: white; border-color: var(--blue-police); }
+        .slide-tab:hover:not(.active) { background: #f0f0f0; }
+
+        /* Slide Editor Form */
+        .slide-form { display: none; }
+        .slide-form.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Buttons */
+        .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+        .btn-primary { background: var(--gold); color: #1a1a1a; width: 100%; }
+        .btn-primary:hover { background: var(--gold-hover); transform: translateY(-2px); }
+        .btn-secondary { background: white; border: 1px solid #ccc; color: #333; }
+        .btn-secondary:hover { background: #f5f5f5; }
+        .btn-danger { background: #fee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 0.5rem; font-size: 0.8rem; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; border: 1px solid #ccc; background: #eee; cursor: pointer; border-radius: 4px; }
+        .btn-sm:hover { background: #ddd; }
+
+        /* Image Upload Custom */
+        .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
+        .file-upload-btn { background: white; border: 2px dashed #ccc; color: #666; padding: 1rem; text-align: center; border-radius: 8px; width: 100%; font-size: 0.9rem; cursor: pointer; }
+        .file-upload-wrapper:hover .file-upload-btn { border-color: var(--gold); color: var(--gold); }
+
+        /* --- PREVIEW AREA --- */
+        .preview-area {
+            background: #2c3e50;
+            background-image: radial-gradient(#34495e 1px, transparent 1px);
+            background-size: 20px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phone-mockup {
+            box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* --- CAROUSEL STYLES --- */
+        .carousel-slide {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Themes */
+        .theme-authority { background: #1a1a1a; color: #f5f5f5; }
+        .theme-authority .bg-accent { position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: linear-gradient(135deg, transparent 50%, var(--gold) 50%); opacity: 0.2; }
+        
+        .theme-clean { background: #ffffff; color: #1a1a1a; }
+        
+        .theme-navy { background: linear-gradient(160deg, #0f2027 0%, #203a43 100%); color: white; }
+
+        /* Slide Internal Layout */
+        .slide-content {
+            padding: 3.5rem;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        .slide-title { font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; white-space: pre-wrap; }
+        .slide-text { font-family: 'Montserrat', sans-serif; font-weight: 400; line-height: 1.6; opacity: 0.9; white-space: pre-wrap; margin-bottom: 1.5rem; flex-grow: 1; }
+        
+        /* Footer/Profile */
+        .slide-footer {
+            margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .theme-clean .slide-footer { border-top-color: rgba(0,0,0,0.1); }
+        
+        .profile-info { display: flex; flex-direction: column; }
+        .profile-name { font-weight: 700; font-size: 0.85rem; }
+        .profile-handle { font-size: 0.75rem; opacity: 0.7; }
+        .arrow-indicator { font-size: 1.2rem; animation: pulse 2s infinite; color: var(--gold); }
+        .theme-clean .arrow-indicator { color: var(--blue-police); }
+
+        /* Image inside slide */
+        .slide-image-container {
+            width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 1.5rem; display: none;
+        }
+        .slide-image-container img { width: 100%; height: 100%; object-fit: cover; }
+        .has-image .slide-image-container { display: block; }
+
+        @keyframes pulse { 0% { opacity: 0.5; transform: translateX(0); } 50% { opacity: 1; transform: translateX(5px); } 100% { opacity: 0.5; transform: translateX(0); } }
+
+        /* Format Sizes */
+        .format-916 { width: 400px; height: 711px; font-size: 16px; }
+        .format-45 { width: 500px; height: 625px; font-size: 15px; }
+        .format-11 { width: 600px; height: 600px; font-size: 14px; }
+
+        /* Responsive */
+        @media (max-width: 1000px) {
+            .app-container { grid-template-columns: 1fr; overflow-y: auto; }
+            .preview-area { min-height: 80vh; }
+        }
+        
+        .status-message {
+            font-size: 0.75rem; margin-top: 10px; padding: 10px; border-radius: 6px; display: none; line-height: 1.4; word-break: break-all;
+        }
+        .status-error { background: #fee; color: #c00; display: block; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="editor-sidebar">
+        <div>
+            <h1>⚖️ Studio Delegado AI</h1>
+            <p style="font-size: 0.8rem; color: #777;">Versão 6.1 - Final Full Stack</p>
+        </div>
+
+        <div class="ai-box">
+            <div class="ai-header">✨ Gemini AI Integrado</div>
+            
+            <div class="input-group" style="margin-bottom: 0.5rem;">
+                <input type="password" id="apiKey" placeholder="Cole sua API Key do Google aqui" style="font-size: 0.8rem;">
+            </div>
+            
+            <div class="input-group">
+                <textarea id="aiPrompt" placeholder="Digite o tema. Ex: 'Lei Henry Borel - Principais mudanças'" style="height: 80px;"></textarea>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <select id="aiSlideCount" style="width: 80px;">
+                    <option value="1">1 pág</option>
+                    <option value="2">2 pág</option>
+                    <option value="3">3 pág</option>
+                    <option value="4">4 pág</option>
+                    <option value="5" selected>5 pág</option>
+                    <option value="6">6 pág</option>
+                    <option value="7">7 pág</option>
+                    <option value="8">8 pág</option>
+                    <option value="9">9 pág</option>
+                    <option value="10">10 pág</option>
+                </select>
+                <button class="btn-ai" onclick="generateWithGeminiOptimized()" id="btnGenerate">
+                    <span>⚡ Gerar & Legendar</span>
+                </button>
+            </div>
+            <div id="aiStatus" class="status-message"></div>
+
+            <div id="generatedCaptionBox" class="caption-box">
+                <div class="caption-header">
+                    📝 Legenda Sugerida
+                    <button class="btn-sm" onclick="copyCaption()">📋 Copiar</button>
+                </div>
+                <textarea id="captionText" style="height: 120px; font-size: 0.8rem; color: #555;" readonly></textarea>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <h2>👤 Identidade Visual</h2>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="input-group">
+                    <label>Nome</label>
+                    <input type="text" id="globalName" value="Dr. Nome Sobrenome" oninput="updateAllPreviews()">
+                </div>
+                <div class="input-group">
+                    <label>Arroba / Cargo</label>
+                    <input type="text" id="globalHandle" value="@seu.perfil | Delegado" oninput="updateAllPreviews()">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Tema Visual</label>
+                <select id="globalTheme" onchange="updateAllPreviews()">
+                    <option value="theme-authority">Authority (Preto e Dourado)</option>
+                    <option value="theme-navy">Polícia (Azul Noturno)</option>
+                    <option value="theme-clean">Minimalist (Branco e Azul)</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label>Formato</label>
+                <select id="globalFormat" onchange="updateAllPreviews()">
+                    <option value="format-45">Feed (4:5) - Recomendado</option>
+                    <option value="format-916">Stories/Reels (9:16)</option>
+                    <option value="format-11">Quadrado (1:1)</option>
+                </select>
+            </div>
+        </div>
+
+        <div>
+            <h2>🎞️ Slides</h2>
+            <div class="slide-tabs" id="slideTabs">
+                </div>
+            
+            <div id="slideFormsContainer">
+                </div>
+
+            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button class="btn btn-secondary" onclick="addSlide()" style="flex:1;">+ Novo Slide</button>
+                <button class="btn btn-danger" onclick="removeCurrentSlide()">Remover</button>
+            </div>
+        </div>
+
+        <div class="settings-group">
+            <button class="btn btn-primary" onclick="downloadAll()">
+                ⬇️ Baixar Todos os Slides (HD)
+            </button>
+        </div>
+    </div>
+
+    <div class="preview-area">
+        <div id="activePreviewWrapper">
+            </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+    // --- STATE ---
+    let state = {
+        currentSlideIndex: 0,
+        caption: '', // Armazena a legenda
+        slides: [
+            {
+                title: 'STUDIO DELEGADO AI',
+                text: 'Geração de Slides + Legenda + Hashtags. Layout limpo e seletor de 1 a 10 páginas.',
+                image: null,
+                isCover: true
+            }
+        ]
+    };
+
+    // --- INITIALIZATION ---
+    function init() {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if(savedKey) document.getElementById('apiKey').value = savedKey;
+
+        renderTabs();
+        renderForms();
+        updateAllPreviews();
+    }
+
+    // --- GEMINI AI (COM LEGENDA) ---
+    async function generateWithGeminiOptimized() {
+        const apiKey = document.getElementById('apiKey').value.trim();
+        const promptText = document.getElementById('aiPrompt').value.trim();
+        const slideCount = document.getElementById('aiSlideCount').value;
+        const btn = document.getElementById('btnGenerate');
+        const status = document.getElementById('aiStatus');
+        const captionBox = document.getElementById('generatedCaptionBox');
+
+        if (!apiKey) { alert('Insira sua API Key.'); return; }
+        if (!promptText) { alert('Digite um tema.'); return; }
+
+        localStorage.setItem('gemini_api_key', apiKey);
+
+        btn.disabled = true;
+        btn.innerHTML = '⚡ Escrevendo legenda e slides...';
+        status.style.display = 'block';
+        status.className = 'status-message';
+        status.style.background = '#e2e3e5';
+        status.style.color = '#383d41';
+        status.innerHTML = 'Conectando ao modo gratuito (Flash)...';
+        captionBox.style.display = 'none'; // Esconde anterior
+
+        try {
+            // LISTAR MODELOS
+            const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            if (!listResponse.ok) {
+                const err = await listResponse.json();
+                if(JSON.stringify(err).includes('quota')) throw new Error("Cota excedida. Aguarde 1 minuto.");
+                throw new Error(`Falha de conexão: ${err.error?.message}`);
+            }
+
+            const listData = await listResponse.json();
+            const availableModels = listData.models || [];
+            let selectedModel = availableModels.find(m => m.name.includes('gemini-1.5-flash'));
+            if (!selectedModel) selectedModel = availableModels.find(m => m.name.includes('flash'));
+            if (!selectedModel) selectedModel = availableModels[0];
+
+            if (!selectedModel) throw new Error("Nenhum modelo disponível.");
+            const modelName = selectedModel.name;
+            status.innerHTML = `✅ Modelo: <strong>${modelName.replace('models/', '')}</strong>. Criando conteúdo...`;
+
+            // PROMPT OTIMIZADO PARA RETORNAR OBJETO {slides, caption}
+            const systemPrompt = `
+            Você é um Delegado de Polícia especialista em asssunto Jurídico.
+            Tarefa 1: Crie ${slideCount} slides sobre: "${promptText}".
+            Tarefa 2: Crie uma legenda para Instagram sobre esse tema. Use tom de autoridade, gatilhos mentais e inclua 10 hashtags relevantes.
+            
+            Retorne APENAS um JSON válido com esta estrutura exata:
+            {
+              "slides": [
+                {"title": "...", "text": "...", "isCover": true},
+                {"title": "...", "text": "...", "isCover": false}
+              ],
+              "caption": "Escreva a legenda aqui... #hashtags"
+            }
+            `;
+
+            const genResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
+            });
+
+            if (!genResponse.ok) {
+                const errGen = await genResponse.json();
+                if(JSON.stringify(errGen).includes('quota')) {
+                    throw new Error("Limite de velocidade. Aguarde 10s.");
+                }
+                throw new Error(`Erro na geração: ${errGen.error?.message}`);
+            }
+
+            const genData = await genResponse.json();
+            let rawText = genData.candidates[0].content.parts[0].text;
+            // Limpeza agressiva do JSON
+            rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
+            
+            const result = JSON.parse(rawText);
+
+            // Validar estrutura
+            const newSlides = result.slides || result; // Fallback se a IA esquecer o caption
+            const newCaption = result.caption || "Legenda não gerada automaticamente.";
+
+            // Atualizar Estado
+            state.slides = Array.isArray(newSlides) ? newSlides.map(s => ({
+                title: s.title || 'Título',
+                text: s.text || 'Texto...',
+                image: null,
+                isCover: !!s.isCover
+            })) : state.slides;
+
+            state.caption = newCaption;
+
+            // Renderizar
+            state.currentSlideIndex = 0;
+            renderTabs();
+            renderForms();
+            updateAllPreviews();
+
+            // Mostrar Legenda
+            document.getElementById('captionText').value = state.caption;
+            captionBox.style.display = 'block';
+
+            status.style.background = '#d4edda';
+            status.style.color = '#155724';
+            status.innerHTML = `✅ Sucesso! Slides e Legenda criados.`;
+
+        } catch (error) {
+            console.error(error);
+            status.className = 'status-message status-error';
+            status.innerHTML = `❌ Erro: ${error.message}`;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '⚡ Gerar & Legendar';
+        }
+    }
+
+    // --- CAPTION UTILS ---
+    function copyCaption() {
+        const captionText = document.getElementById('captionText');
+        captionText.select();
+        document.execCommand('copy');
+        alert('Legenda copiada para a área de transferência!');
+    }
+
+    // --- RENDER FUNCTIONS ---
+    function renderTabs() {
+        const container = document.getElementById('slideTabs');
+        container.innerHTML = state.slides.map((_, idx) => `
+            <div class="slide-tab ${idx === state.currentSlideIndex ? 'active' : ''}" 
+                 onclick="switchSlide(${idx})">
+                ${idx + 1}
+            </div>
+        `).join('');
+    }
+
+    function renderForms() {
+        const container = document.getElementById('slideFormsContainer');
+        container.innerHTML = '';
+
+        state.slides.forEach((slide, idx) => {
+            const form = document.createElement('div');
+            form.className = `slide-form ${idx === state.currentSlideIndex ? 'active' : ''}`;
+            
+            form.innerHTML = `
+                <div class="input-group">
+                    <label>Título Principal</label>
+                    <textarea style="height: 60px" oninput="updateSlideData(${idx}, 'title', this.value)">${slide.title}</textarea>
+                </div>
+                
+                <div class="input-group">
+                    <label>Imagem de Destaque (Opcional)</label>
+                    <div class="file-upload-wrapper">
+                        <button class="file-upload-btn">${slide.image ? '✅ Imagem Carregada (Clique para trocar)' : '📁 Adicionar Print/Foto'}</button>
+                        <input type="file" accept="image/*" onchange="handleSlideImageUpload(this, ${idx})">
+                    </div>
+                    ${slide.image ? `<button onclick="removeSlideImage(${idx})" style="margin-top:5px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer;">Remover Imagem</button>` : ''}
+                </div>
+
+                <div class="input-group">
+                    <label>Conteúdo do Slide</label>
+                    <textarea style="height: 120px" oninput="updateSlideData(${idx}, 'text', this.value)">${slide.text}</textarea>
+                </div>
+            `;
+            container.appendChild(form);
+        });
+    }
+
+    function renderPreview(slideIndex) {
+        const wrapper = document.getElementById('activePreviewWrapper');
+        const slide = state.slides[slideIndex];
+        const theme = document.getElementById('globalTheme').value;
+        const format = document.getElementById('globalFormat').value;
+        const name = document.getElementById('globalName').value;
+        const handle = document.getElementById('globalHandle').value;
+
+        const isLast = slideIndex === state.slides.length - 1;
+        const arrowHtml = isLast ? '💾' : '➡';
+        const titleSize = slide.isCover ? '2.5em' : '1.8em';
+
+        wrapper.innerHTML = `
+            <div id="render-target" class="carousel-slide ${format} ${theme} phone-mockup">
+                <div class="bg-accent"></div>
+                
+                <div class="slide-content">
+                    <div class="slide-title" style="font-size: ${titleSize}">${slide.title.replace(/\n/g, '<br>')}</div>
+                    
+                    <div class="slide-image-container ${slide.image ? 'has-image' : ''}">
+                        ${slide.image ? `<img src="${slide.image}">` : ''}
+                    </div>
+
+                    <div class="slide-text">${slide.text.replace(/\n/g, '<br>')}</div>
+
+                    <div class="slide-footer">
+                        <div class="profile-info">
+                            <div class="profile-name">${name}</div>
+                            <div class="profile-handle">${handle}</div>
+                        </div>
+                        <div class="arrow-indicator">${arrowHtml}</div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    // --- LOGIC HANDLERS ---
+    function switchSlide(idx) {
+        state.currentSlideIndex = idx;
+        renderTabs();
+        document.querySelectorAll('.slide-form').forEach((el, i) => {
+            if(i === idx) {
+                el.classList.add('active');
+                el.style.display = 'block';
+            } else {
+                el.classList.remove('active');
+                el.style.display = 'none';
+            }
+        });
+        updateAllPreviews();
+    }
+
+    function updateSlideData(idx, field, value) {
+        state.slides[idx][field] = value;
+        updateAllPreviews(); 
+    }
+
+    function updateAllPreviews() {
+        renderPreview(state.currentSlideIndex);
+    }
+
+    function addSlide() {
+        state.slides.push({
+            title: 'Novo Título',
+            text: 'Digite seu conteúdo aqui...',
+            image: null,
+            isCover: false
+        });
+        renderTabs();
+        renderForms();
+        switchSlide(state.slides.length - 1);
+    }
+
+    function removeCurrentSlide() {
+        if(state.slides.length <= 1) return alert('Você precisa de pelo menos 1 slide!');
+        state.slides.splice(state.currentSlideIndex, 1);
+        state.currentSlideIndex = Math.max(0, state.currentSlideIndex - 1);
+        renderTabs();
+        renderForms();
+        switchSlide(state.currentSlideIndex);
+    }
+
+    function handleSlideImageUpload(input, idx) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                state.slides[idx].image = e.target.result;
+                renderForms(); 
+                updateAllPreviews();
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
+    function removeSlideImage(idx) {
+        state.slides[idx].image = null;
+        renderForms();
+        updateAllPreviews();
+    }
+
+    async function downloadAll() {
+        const originalIndex = state.currentSlideIndex;
+        const btn = document.querySelector('.btn-primary');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '⏳ Gerando imagens...';
+        btn.disabled = true;
+
+        for (let i = 0; i < state.slides.length; i++) {
+            state.currentSlideIndex = i;
+            renderPreview(i);
+            await new Promise(r => setTimeout(r, 300)); 
+            
+            const element = document.getElementById('render-target');
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 3, 
+                    useCORS: true,
+                    backgroundColor: null
+                });
+                const link = document.createElement('a');
+                link.download = `carrossel-slide-${i+1}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (err) {
+                console.error(err);
+                alert('Erro ao gerar slide ' + (i+1));
+            }
+        }
+        state.currentSlideIndex = originalIndex;
+        renderPreview(originalIndex);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+
+    init();
+</script>
+</body>
+</html>
