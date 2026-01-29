@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Studio Delegado AI - V7 Mobile</title>
+    <title>Studio Delegado AI - V8 Master</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         /* --- RESET & VARS --- */
@@ -26,7 +26,7 @@
             background: #f0f2f5;
             color: var(--text-main);
             height: 100vh;
-            overflow: hidden; /* Desktop trava, Mobile trata diferente */
+            overflow: hidden; 
         }
 
         /* --- LAYOUT --- */
@@ -46,11 +46,30 @@
             flex-direction: column;
             gap: 2rem;
             height: 100%;
-            padding-bottom: 100px; /* Espaço extra para mobile nav */
+            padding-bottom: 100px; 
         }
 
         h1 { font-size: 1.4rem; color: var(--blue-police); font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
         
+        /* TOOLBAR (FORMATTING) - NEW */
+        .toolbar {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+            background: #f1f3f5;
+            padding: 5px;
+            border-radius: 6px;
+            flex-wrap: wrap;
+        }
+        .tool-btn {
+            background: white; border: 1px solid #ccc; border-radius: 4px;
+            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 0.9rem; color: #333;
+        }
+        .tool-btn:hover { background: #e9ecef; }
+        .tool-btn.active { background: var(--blue-police); color: white; border-color: var(--blue-police); }
+        .tool-separator { width: 1px; background: #ccc; margin: 0 5px; }
+
         /* AI SECTION */
         .ai-box {
             background: linear-gradient(to right, #f8f9fa, #fff);
@@ -59,98 +78,73 @@
             padding: 1.5rem;
             border-radius: var(--radius);
         }
-        
         .ai-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; font-weight: 700; color: #4285f4; }
-        
         .btn-ai {
-            background: var(--ai-gradient);
-            color: white;
-            border: none;
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: 0.2s;
-            margin-top: 10px;
+            background: var(--ai-gradient); color: white; border: none; width: 100%; padding: 10px;
+            border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; margin-top: 10px;
             display: flex; justify-content: center; align-items: center; gap: 8px;
         }
-        .btn-ai:hover { opacity: 0.9; transform: scale(0.99); }
         .btn-ai:disabled { opacity: 0.6; cursor: wait; }
 
-        /* CAPTION BOX */
         .caption-box {
-            background: #fff;
-            border: 1px dashed #ccc;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-top: 1rem;
-            display: none;
+            background: #fff; border: 1px dashed #ccc; padding: 1rem; border-radius: 8px; margin-top: 1rem; display: none;
         }
         .caption-header {
-            font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 0.5rem;
-            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Global Settings Group */
+        /* Global Settings */
         .settings-group { background: #f8f9fa; padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); }
-        
         .input-group { margin-bottom: 1rem; }
         .input-group label { display: block; font-size: 0.75rem; font-weight: 700; margin-bottom: 0.5rem; color: #555; }
-        
         input, select, textarea {
             width: 100%; padding: 0.8rem; border: 1px solid #ccc; border-radius: 8px;
             font-family: inherit; font-size: 0.9rem; transition: 0.2s;
         }
-        input:focus, select:focus, textarea:focus { border-color: var(--gold); outline: none; box-shadow: 0 0 0 3px rgba(201, 164, 76, 0.1); }
-
-        /* Slide Tabs (Navigation) */
+        
+        /* Slide Tabs */
         .slide-tabs {
-            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem;
-            border-bottom: 1px solid var(--border); margin-bottom: 1rem;
+            display: flex; gap: 0.5rem; overflow-x: auto; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); margin-bottom: 1rem;
         }
         .slide-tab {
             min-width: 40px; height: 40px; border-radius: 8px; border: 1px solid #ddd;
             display: flex; align-items: center; justify-content: center;
-            font-weight: 700; cursor: pointer; background: white; color: #666;
-            transition: 0.2s;
+            font-weight: 700; cursor: pointer; background: white; color: #666; transition: 0.2s;
         }
         .slide-tab.active { background: var(--blue-police); color: white; border-color: var(--blue-police); }
-        .slide-tab:hover:not(.active) { background: #f0f0f0; }
-
-        /* Slide Editor Form */
-        .slide-form { display: none; }
-        .slide-form.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
         /* Buttons */
         .btn { padding: 0.8rem 1.5rem; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
         .btn-primary { background: var(--gold); color: #1a1a1a; width: 100%; }
-        .btn-primary:hover { background: var(--gold-hover); transform: translateY(-2px); }
         .btn-secondary { background: white; border: 1px solid #ccc; color: #333; }
-        .btn-secondary:hover { background: #f5f5f5; }
         .btn-danger { background: #fee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 0.5rem; font-size: 0.8rem; }
         .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; border: 1px solid #ccc; background: #eee; cursor: pointer; border-radius: 4px; }
-        .btn-sm:hover { background: #ddd; }
 
-        /* Image Upload Custom */
+        /* Image Upload */
         .file-upload-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
         .file-upload-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; }
         .file-upload-btn { background: white; border: 2px dashed #ccc; color: #666; padding: 1rem; text-align: center; border-radius: 8px; width: 100%; font-size: 0.9rem; cursor: pointer; }
-        .file-upload-wrapper:hover .file-upload-btn { border-color: var(--gold); color: var(--gold); }
 
-        /* --- PREVIEW AREA --- */
+        /* --- PREVIEW AREA (UPDATED FOR SWIPE) --- */
         .preview-area {
             background: #2c3e50;
             background-image: radial-gradient(#34495e 1px, transparent 1px);
             background-size: 20px 20px;
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: center; /* Desktop: Center current slide */
             padding: 2rem;
             position: relative;
             overflow: hidden;
-            transition: all 0.3s;
+        }
+
+        .active-slide-container {
+            /* Container for the single slide being edited on Desktop */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
         }
 
         .phone-mockup {
@@ -158,39 +152,20 @@
             border-radius: 2px;
             transition: all 0.3s ease;
             transform-origin: center center;
+            flex-shrink: 0; /* Prevent squishing */
         }
 
         /* --- MOBILE NAVIGATION --- */
         .mobile-nav {
             display: none;
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: var(--mobile-nav-height);
-            background: white;
-            border-top: 1px solid #ddd;
-            z-index: 1000;
-            box-shadow: 0 -5px 10px rgba(0,0,0,0.05);
+            position: fixed; bottom: 0; left: 0; width: 100%; height: var(--mobile-nav-height);
+            background: white; border-top: 1px solid #ddd; z-index: 1000; box-shadow: 0 -5px 10px rgba(0,0,0,0.05);
         }
-        
         .mobile-nav-btn {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: 600;
-            color: #888;
-            cursor: pointer;
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 0.7rem; font-weight: 600; color: #888; cursor: pointer;
         }
-        
-        .mobile-nav-btn.active {
-            color: var(--blue-police);
-            background: #f0f7ff;
-        }
-        
+        .mobile-nav-btn.active { color: var(--blue-police); background: #f0f7ff; }
         .mobile-nav-btn span { font-size: 1.2rem; margin-bottom: 2px; }
 
         /* --- CAROUSEL STYLES --- */
@@ -204,32 +179,49 @@
         /* Themes */
         .theme-authority { background: #1a1a1a; color: #f5f5f5; }
         .theme-authority .bg-accent { position: absolute; top: 0; right: 0; width: 150px; height: 150px; background: linear-gradient(135deg, transparent 50%, var(--gold) 50%); opacity: 0.2; }
-        
         .theme-clean { background: #ffffff; color: #1a1a1a; }
-        
         .theme-navy { background: linear-gradient(160deg, #0f2027 0%, #203a43 100%); color: white; }
 
-        /* Slide Internal Layout */
+        /* Slide Internal Layout (UPDATED: VERTICAL CENTER) */
         .slide-content {
             padding: 3.5rem;
             height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: center;
+            justify-content: center; /* CENTRALIZA VERTICALMENTE */
             z-index: 2;
         }
 
-        .slide-title { font-family: 'Montserrat', sans-serif; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; white-space: pre-wrap; }
-        .slide-text { font-family: 'Montserrat', sans-serif; font-weight: 400; line-height: 1.6; opacity: 0.9; white-space: pre-wrap; margin-bottom: 1.5rem; flex-grow: 1; }
+        .slide-title { 
+            font-family: 'Montserrat', sans-serif; 
+            font-weight: 800; 
+            line-height: 1.1; 
+            margin-bottom: 1.5rem; 
+            white-space: pre-wrap; 
+        }
+        
+        .slide-text { 
+            font-family: 'Montserrat', sans-serif; 
+            font-weight: 400; 
+            line-height: 1.6; 
+            opacity: 0.9; 
+            white-space: pre-wrap; 
+            margin-bottom: 1.5rem; 
+            /* flex-grow removed to allow centering */
+        }
         
         /* Footer/Profile */
         .slide-footer {
-            margin-top: auto; padding-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1);
+            /* Pushes to bottom if content is small, but respects center alignment */
+            margin-top: auto; 
+            padding-top: 1.5rem; 
+            border-top: 1px solid rgba(255,255,255,0.1);
             display: flex; align-items: center; justify-content: space-between;
+            width: 100%;
         }
         .theme-clean .slide-footer { border-top-color: rgba(0,0,0,0.1); }
         
-        .profile-info { display: flex; flex-direction: column; }
+        .profile-info { display: flex; flex-direction: column; text-align: left; }
         .profile-name { font-weight: 700; font-size: 0.85rem; }
         .profile-handle { font-size: 0.75rem; opacity: 0.7; }
         .arrow-indicator { font-size: 1.2rem; animation: pulse 2s infinite; color: var(--gold); }
@@ -237,7 +229,7 @@
 
         /* Image inside slide */
         .slide-image-container {
-            width: 100%; height: 200px; overflow: hidden; border-radius: 8px; margin-bottom: 1.5rem; display: none;
+            width: 100%; height: 250px; overflow: hidden; border-radius: 8px; margin-bottom: 1.5rem; display: none;
         }
         .slide-image-container img { width: 100%; height: 100%; object-fit: cover; }
         .has-image .slide-image-container { display: block; }
@@ -251,44 +243,59 @@
 
         /* RESPONSIVE & MOBILE FIXES */
         @media (max-width: 1000px) {
-            body { overflow: hidden; } /* Previne scroll no body */
+            body { overflow: hidden; }
             .app-container { 
                 grid-template-columns: 1fr; 
-                height: calc(100vh - var(--mobile-nav-height)); /* Desconta a barra */
+                height: calc(100vh - var(--mobile-nav-height));
                 overflow: hidden;
             }
-            
-            /* Habilitar Mobile Nav */
             .mobile-nav { display: flex; }
 
-            /* Painéis funcionam como abas */
             .editor-sidebar { 
-                width: 100%; 
-                position: absolute; top: 0; left: 0; 
-                z-index: 10; 
-                display: flex; /* Flexbox para scroll funcionar */
-                padding-bottom: 80px; /* Mais espaço pra scroll */
+                width: 100%; position: absolute; top: 0; left: 0; z-index: 10; display: flex; padding-bottom: 80px; 
             }
             
+            /* SWIPEABLE PREVIEW AREA */
             .preview-area { 
-                width: 100%; height: 100%;
-                position: absolute; top: 0; left: 0; 
-                z-index: 5;
-                display: none; /* Escondido por padrão */
-                padding: 1rem;
+                width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 5;
+                display: none; padding: 0; /* Remove padding for swipe */
+                align-items: flex-start; /* Align top */
+                justify-content: flex-start;
+                background: #2c3e50;
+                
+                /* Enable Scroll */
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                -webkit-overflow-scrolling: touch;
             }
 
-            /* Quando ativo */
+            .active-slide-container {
+                /* Transform active container into a strip */
+                display: flex;
+                width: auto;
+                height: 100%;
+                padding: 40px 20px; /* Padding inside scroll */
+                gap: 20px;
+                justify-content: flex-start;
+                align-items: center;
+            }
+
+            .phone-mockup {
+                scroll-snap-align: center;
+                transform: scale(1); /* Reset scale, handle size via flex */
+                /* Shrink slightly to fit screen width if needed, or scroll */
+                min-width: 85vw;
+                max-width: 85vw;
+                height: auto;
+                aspect-ratio: 4/5; /* Approximate based on format */
+            }
+            .format-916 { aspect-ratio: 9/16; }
+            .format-11 { aspect-ratio: 1/1; }
+
             .show-editor .editor-sidebar { display: flex; z-index: 20; }
             .show-editor .preview-area { display: none; }
-            
             .show-preview .preview-area { display: flex; z-index: 20; }
             .show-preview .editor-sidebar { display: none; }
-
-            /* Zoom no preview para caber na tela */
-            #render-target {
-                transform: scale(0.65); /* Reduz slide pra caber */
-            }
         }
         
         .status-message {
@@ -297,24 +304,23 @@
         .status-error { background: #fee; color: #c00; display: block; }
     </style>
 </head>
-<body class="show-editor"> <div class="app-container">
+<body class="show-editor">
+
+<div class="app-container">
     <div class="editor-sidebar" id="editorPanel">
         <div>
             <h1>⚖️ Studio Delegado AI</h1>
-            <p style="font-size: 0.8rem; color: #777;">V7.0 Mobile - Use as abas abaixo</p>
+            <p style="font-size: 0.8rem; color: #777;">V8.0 Master - Texto Rico & Swipe</p>
         </div>
 
         <div class="ai-box">
             <div class="ai-header">✨ Gemini AI Integrado</div>
-            
             <div class="input-group" style="margin-bottom: 0.5rem;">
                 <input type="password" id="apiKey" placeholder="Cole sua API Key do Google aqui" style="font-size: 0.8rem;">
             </div>
-            
             <div class="input-group">
                 <textarea id="aiPrompt" placeholder="Digite o tema. Ex: 'Lei Henry Borel - Principais mudanças'" style="height: 80px;"></textarea>
             </div>
-            
             <div style="display: flex; gap: 10px;">
                 <select id="aiSlideCount" style="width: 80px;">
                     <option value="1">1 pág</option>
@@ -329,35 +335,24 @@
                     <option value="10">10 pág</option>
                 </select>
                 <button class="btn-ai" onclick="generateWithGeminiOptimized()" id="btnGenerate">
-                    <span>⚡ Gerar IA</span>
+                    <span>⚡ Gerar & Legendar</span>
                 </button>
             </div>
             <div id="aiStatus" class="status-message"></div>
-
             <div id="generatedCaptionBox" class="caption-box">
-                <div class="caption-header">
-                    📝 Legenda
-                    <button class="btn-sm" onclick="copyCaption()">Copiar</button>
-                </div>
+                <div class="caption-header">📝 Legenda <button class="btn-sm" onclick="copyCaption()">Copiar</button></div>
                 <textarea id="captionText" style="height: 100px; font-size: 0.8rem; color: #555;" readonly></textarea>
             </div>
         </div>
 
         <div class="settings-group">
             <h2>👤 Identidade Visual</h2>
-            
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="input-group">
-                    <label>Nome</label>
-                    <input type="text" id="globalName" value="Dr. Nome Sobrenome" oninput="updateAllPreviews()">
-                </div>
-                <div class="input-group">
-                    <label>Arroba / Cargo</label>
-                    <input type="text" id="globalHandle" value="@seu.perfil | Delegado" oninput="updateAllPreviews()">
-                </div>
+                <div class="input-group"><label>Nome</label><input type="text" id="globalName" value="Dr. Nome Sobrenome" oninput="updateAllPreviews()"></div>
+                <div class="input-group"><label>Arroba / Cargo</label><input type="text" id="globalHandle" value="@seu.perfil | Delegado" oninput="updateAllPreviews()"></div>
             </div>
             <div class="input-group">
-                <label>Tema Visual</label>
+                <label>Tema</label>
                 <select id="globalTheme" onchange="updateAllPreviews()">
                     <option value="theme-authority">Authority (Preto e Dourado)</option>
                     <option value="theme-navy">Polícia (Azul Noturno)</option>
@@ -367,8 +362,8 @@
             <div class="input-group">
                 <label>Formato</label>
                 <select id="globalFormat" onchange="updateAllPreviews()">
-                    <option value="format-45">Feed (4:5) - Recomendado</option>
-                    <option value="format-916">Stories/Reels (9:16)</option>
+                    <option value="format-45">Feed (4:5)</option>
+                    <option value="format-916">Stories (9:16)</option>
                     <option value="format-11">Quadrado (1:1)</option>
                 </select>
             </div>
@@ -376,12 +371,8 @@
 
         <div>
             <h2>🎞️ Slides</h2>
-            <div class="slide-tabs" id="slideTabs">
-                </div>
-            
-            <div id="slideFormsContainer">
-                </div>
-
+            <div class="slide-tabs" id="slideTabs"></div>
+            <div id="slideFormsContainer"></div>
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
                 <button class="btn btn-secondary" onclick="addSlide()" style="flex:1;">+ Novo</button>
                 <button class="btn btn-danger" onclick="removeCurrentSlide()">Remover</button>
@@ -389,27 +380,19 @@
         </div>
 
         <div class="settings-group">
-            <button class="btn btn-primary" onclick="downloadAll()">
-                ⬇️ Baixar Imagens (HD)
-            </button>
+            <button class="btn btn-primary" onclick="downloadAll()">⬇️ Baixar Imagens (HD)</button>
         </div>
     </div>
 
     <div class="preview-area" id="previewPanel">
-        <div id="activePreviewWrapper">
+        <div id="activePreviewWrapper" class="active-slide-container">
             </div>
     </div>
 </div>
 
 <div class="mobile-nav">
-    <div class="mobile-nav-btn active" onclick="setMobileTab('editor')" id="tabEditor">
-        <span>✏️</span>
-        Editar
-    </div>
-    <div class="mobile-nav-btn" onclick="setMobileTab('preview')" id="tabPreview">
-        <span>👁️</span>
-        Ver Arte
-    </div>
+    <div class="mobile-nav-btn active" onclick="setMobileTab('editor')" id="tabEditor"><span>✏️</span>Editar</div>
+    <div class="mobile-nav-btn" onclick="setMobileTab('preview')" id="tabPreview"><span>👁️</span>Ver Arte</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -421,19 +404,29 @@
         slides: [
             {
                 title: 'STUDIO DELEGADO AI',
-                text: 'Layout Mobile 100% Funcional! Use as abas no rodapé para alternar entre editar e ver a arte.',
+                text: 'Selecione o texto e clique em B ou I para formatar. Alinhe usando os botões acima.',
                 image: null,
-                isCover: true
+                isCover: true,
+                titleAlign: 'center',
+                textAlign: 'center'
             }
         ]
     };
 
-    // --- MOBILE TAB LOGIC ---
+    // --- INITIALIZATION ---
+    function init() {
+        const savedKey = localStorage.getItem('gemini_api_key');
+        if(savedKey) document.getElementById('apiKey').value = savedKey;
+        renderTabs();
+        renderForms();
+        updateAllPreviews();
+    }
+
+    // --- MOBILE TABS ---
     function setMobileTab(tab) {
         const body = document.body;
         const btnEditor = document.getElementById('tabEditor');
         const btnPreview = document.getElementById('tabPreview');
-
         if (tab === 'editor') {
             body.classList.add('show-editor');
             body.classList.remove('show-preview');
@@ -444,23 +437,11 @@
             body.classList.add('show-preview');
             btnEditor.classList.remove('active');
             btnPreview.classList.add('active');
-            
-            // Força atualização do preview ao entrar na aba
-            updateAllPreviews();
+            updateAllPreviews(); // Render all slides for swipe
         }
     }
 
-    // --- INITIALIZATION ---
-    function init() {
-        const savedKey = localStorage.getItem('gemini_api_key');
-        if(savedKey) document.getElementById('apiKey').value = savedKey;
-
-        renderTabs();
-        renderForms();
-        updateAllPreviews();
-    }
-
-    // --- GEMINI AI (COM LEGENDA) ---
+    // --- GEMINI AI ---
     async function generateWithGeminiOptimized() {
         const apiKey = document.getElementById('apiKey').value.trim();
         const promptText = document.getElementById('aiPrompt').value.trim();
@@ -471,7 +452,6 @@
 
         if (!apiKey) { alert('Insira sua API Key.'); return; }
         if (!promptText) { alert('Digite um tema.'); return; }
-
         localStorage.setItem('gemini_api_key', apiKey);
 
         btn.disabled = true;
@@ -485,21 +465,12 @@
 
         try {
             const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-            if (!listResponse.ok) {
-                const err = await listResponse.json();
-                if(JSON.stringify(err).includes('quota')) throw new Error("Cota excedida. Aguarde 1 min.");
-                throw new Error(`Conexão falhou: ${err.error?.message}`);
-            }
-
+            if (!listResponse.ok) throw new Error("Erro de conexão/chave.");
             const listData = await listResponse.json();
             const availableModels = listData.models || [];
-            let selectedModel = availableModels.find(m => m.name.includes('gemini-1.5-flash'));
-            if (!selectedModel) selectedModel = availableModels.find(m => m.name.includes('flash'));
-            if (!selectedModel) selectedModel = availableModels[0];
-
+            let selectedModel = availableModels.find(m => m.name.includes('gemini-1.5-flash')) || availableModels[0];
             if (!selectedModel) throw new Error("Sem modelos disponíveis.");
             const modelName = selectedModel.name;
-            status.innerHTML = `✅ Gerando via IA...`;
 
             const systemPrompt = `
             Você é um Delegado especialista em Marketing.
@@ -521,29 +492,23 @@
                 body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
             });
 
-            if (!genResponse.ok) {
-                const errGen = await genResponse.json();
-                if(JSON.stringify(errGen).includes('quota')) throw new Error("Limite atingido. Aguarde 10s.");
-                throw new Error(`Erro API: ${errGen.error?.message}`);
-            }
-
+            if (!genResponse.ok) throw new Error("Erro na geração.");
             const genData = await genResponse.json();
             let rawText = genData.candidates[0].content.parts[0].text;
             rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
-            
             const result = JSON.parse(rawText);
             const newSlides = result.slides || result; 
-            const newCaption = result.caption || "Legenda não gerada.";
-
+            
             state.slides = Array.isArray(newSlides) ? newSlides.map(s => ({
                 title: s.title || 'Título',
                 text: s.text || 'Texto...',
                 image: null,
-                isCover: !!s.isCover
+                isCover: !!s.isCover,
+                titleAlign: 'center',
+                textAlign: 'left' // Padrão justificado/esquerda
             })) : state.slides;
 
-            state.caption = newCaption;
-
+            state.caption = result.caption || "";
             state.currentSlideIndex = 0;
             renderTabs();
             renderForms();
@@ -551,43 +516,49 @@
 
             document.getElementById('captionText').value = state.caption;
             captionBox.style.display = 'block';
+            status.style.display = 'none';
 
-            status.style.background = '#d4edda';
-            status.style.color = '#155724';
-            status.innerHTML = `✅ Sucesso!`;
-
-            // No mobile, sugere ver o preview
             if(window.innerWidth < 1000) {
-                if(confirm("Conteúdo gerado! Ir para 'Ver Arte' agora?")) {
-                    setMobileTab('preview');
-                }
+                if(confirm("Conteúdo gerado! Ir para 'Ver Arte'?")) setMobileTab('preview');
             }
-
         } catch (error) {
-            console.error(error);
             status.className = 'status-message status-error';
             status.innerHTML = `❌ Erro: ${error.message}`;
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '⚡ Gerar IA';
+            btn.innerHTML = '⚡ Gerar & Legendar';
         }
     }
 
     function copyCaption() {
-        const captionText = document.getElementById('captionText');
-        captionText.select();
-        document.execCommand('copy');
-        alert('Copiado!');
+        const t = document.getElementById('captionText'); t.select(); document.execCommand('copy'); alert('Copiado!');
+    }
+
+    // --- TEXT FORMATTING HELPERS ---
+    function insertTag(field, tag, idx) {
+        const textarea = document.getElementById(`${field}-${idx}`);
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const text = textarea.value;
+        const before = text.substring(0, start);
+        const selected = text.substring(start, end);
+        const after = text.substring(end);
+        
+        if (selected.length === 0) return; // Nada selecionado
+
+        const newText = `${before}<${tag}>${selected}</${tag}>${after}`;
+        state.slides[idx][field === 'titleInput' ? 'title' : 'text'] = newText;
+        
+        // Update UI logic
+        textarea.value = newText;
+        updateAllPreviews();
     }
 
     // --- RENDER FUNCTIONS ---
     function renderTabs() {
         const container = document.getElementById('slideTabs');
         container.innerHTML = state.slides.map((_, idx) => `
-            <div class="slide-tab ${idx === state.currentSlideIndex ? 'active' : ''}" 
-                 onclick="switchSlide(${idx})">
-                ${idx + 1}
-            </div>
+            <div class="slide-tab ${idx === state.currentSlideIndex ? 'active' : ''}" onclick="switchSlide(${idx})">${idx + 1}</div>
         `).join('');
     }
 
@@ -599,54 +570,90 @@
             const form = document.createElement('div');
             form.className = `slide-form ${idx === state.currentSlideIndex ? 'active' : ''}`;
             
+            // Default aligns if missing
+            const ta = slide.titleAlign || 'center';
+            const ba = slide.textAlign || 'left';
+
             form.innerHTML = `
                 <div class="input-group">
                     <label>Título Principal</label>
-                    <textarea style="height: 60px" oninput="updateSlideData(${idx}, 'title', this.value)">${slide.title}</textarea>
+                    <div class="toolbar">
+                        <div class="tool-btn ${ta==='left'?'active':''}" onclick="updateAlign(${idx}, 'titleAlign', 'left')">⬅</div>
+                        <div class="tool-btn ${ta==='center'?'active':''}" onclick="updateAlign(${idx}, 'titleAlign', 'center')">⬇</div>
+                        <div class="tool-btn ${ta==='right'?'active':''}" onclick="updateAlign(${idx}, 'titleAlign', 'right')">➡</div>
+                        <div class="tool-separator"></div>
+                        <button class="tool-btn" onclick="insertTag('titleInput', 'b', ${idx})"><b>B</b></button>
+                        <button class="tool-btn" onclick="insertTag('titleInput', 'i', ${idx})"><i>I</i></button>
+                    </div>
+                    <textarea id="titleInput-${idx}" style="height: 60px" oninput="updateSlideData(${idx}, 'title', this.value)">${slide.title}</textarea>
                 </div>
                 
                 <div class="input-group">
-                    <label>Imagem de Destaque (Opcional)</label>
+                    <label>Imagem (Opcional)</label>
                     <div class="file-upload-wrapper">
                         <button class="file-upload-btn">${slide.image ? '✅ Imagem OK' : '📁 Adicionar Foto'}</button>
                         <input type="file" accept="image/*" onchange="handleSlideImageUpload(this, ${idx})">
                     </div>
-                    ${slide.image ? `<button onclick="removeSlideImage(${idx})" style="margin-top:5px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer;">Remover</button>` : ''}
+                    ${slide.image ? `<button onclick="removeSlideImage(${idx})" style="margin-top:5px; font-size:0.7rem; color:red; border:none; background:none;">Remover</button>` : ''}
                 </div>
 
                 <div class="input-group">
-                    <label>Conteúdo do Slide</label>
-                    <textarea style="height: 120px" oninput="updateSlideData(${idx}, 'text', this.value)">${slide.text}</textarea>
+                    <label>Texto do Slide</label>
+                    <div class="toolbar">
+                        <div class="tool-btn ${ba==='left'?'active':''}" onclick="updateAlign(${idx}, 'textAlign', 'left')">⬅</div>
+                        <div class="tool-btn ${ba==='center'?'active':''}" onclick="updateAlign(${idx}, 'textAlign', 'center')">⬇</div>
+                        <div class="tool-btn ${ba==='right'?'active':''}" onclick="updateAlign(${idx}, 'textAlign', 'right')">➡</div>
+                        <div class="tool-btn ${ba==='justify'?'active':''}" onclick="updateAlign(${idx}, 'textAlign', 'justify')">≡</div>
+                        <div class="tool-separator"></div>
+                        <button class="tool-btn" onclick="insertTag('textInput', 'b', ${idx})"><b>B</b></button>
+                        <button class="tool-btn" onclick="insertTag('textInput', 'i', ${idx})"><i>I</i></button>
+                    </div>
+                    <textarea id="textInput-${idx}" style="height: 120px" oninput="updateSlideData(${idx}, 'text', this.value)">${slide.text}</textarea>
                 </div>
             `;
             container.appendChild(form);
         });
     }
 
-    function renderPreview(slideIndex) {
+    function renderPreview() {
         const wrapper = document.getElementById('activePreviewWrapper');
-        const slide = state.slides[slideIndex];
         const theme = document.getElementById('globalTheme').value;
         const format = document.getElementById('globalFormat').value;
         const name = document.getElementById('globalName').value;
         const handle = document.getElementById('globalHandle').value;
+        const isMobile = window.innerWidth < 1000;
 
-        const isLast = slideIndex === state.slides.length - 1;
-        const arrowHtml = isLast ? '💾' : '➡';
-        const titleSize = slide.isCover ? '2.5em' : '1.8em';
+        wrapper.innerHTML = '';
 
-        wrapper.innerHTML = `
-            <div id="render-target" class="carousel-slide ${format} ${theme} phone-mockup">
+        // Se for Desktop: Renderiza apenas o slide atual
+        // Se for Mobile: Renderiza TODOS os slides para Swipe
+        const slidesToRender = isMobile ? state.slides : [state.slides[state.currentSlideIndex]];
+
+        slidesToRender.forEach((slide, loopIdx) => {
+            // Se mobile, o índice real é o loopIdx. Se desktop, é o currentSlideIndex.
+            const realIdx = isMobile ? loopIdx : state.currentSlideIndex;
+            const isLast = realIdx === state.slides.length - 1;
+            const arrowHtml = isLast ? '💾' : '➡';
+            const titleSize = slide.isCover ? '2.5em' : '1.8em';
+            
+            // Alignments
+            const tAlign = slide.titleAlign || 'center';
+            const bAlign = slide.textAlign || 'left';
+
+            const slideDiv = document.createElement('div');
+            slideDiv.id = `slide-render-${realIdx}`; // ID único para download
+            slideDiv.className = `carousel-slide ${format} ${theme} phone-mockup`;
+            
+            slideDiv.innerHTML = `
                 <div class="bg-accent"></div>
-                
                 <div class="slide-content">
-                    <div class="slide-title" style="font-size: ${titleSize}">${slide.title.replace(/\n/g, '<br>')}</div>
+                    <div class="slide-title" style="font-size: ${titleSize}; text-align: ${tAlign}">${slide.title.replace(/\n/g, '<br>')}</div>
                     
                     <div class="slide-image-container ${slide.image ? 'has-image' : ''}">
                         ${slide.image ? `<img src="${slide.image}">` : ''}
                     </div>
 
-                    <div class="slide-text">${slide.text.replace(/\n/g, '<br>')}</div>
+                    <div class="slide-text" style="text-align: ${bAlign}">${slide.text.replace(/\n/g, '<br>')}</div>
 
                     <div class="slide-footer">
                         <div class="profile-info">
@@ -656,21 +663,18 @@
                         <div class="arrow-indicator">${arrowHtml}</div>
                     </div>
                 </div>
-            </div>
-        `;
+            `;
+            wrapper.appendChild(slideDiv);
+        });
     }
 
+    // --- LOGIC ---
     function switchSlide(idx) {
         state.currentSlideIndex = idx;
         renderTabs();
         document.querySelectorAll('.slide-form').forEach((el, i) => {
-            if(i === idx) {
-                el.classList.add('active');
-                el.style.display = 'block';
-            } else {
-                el.classList.remove('active');
-                el.style.display = 'none';
-            }
+            if(i === idx) { el.classList.add('active'); el.style.display = 'block'; } 
+            else { el.classList.remove('active'); el.style.display = 'none'; }
         });
         updateAllPreviews();
     }
@@ -680,29 +684,28 @@
         updateAllPreviews(); 
     }
 
+    function updateAlign(idx, field, value) {
+        state.slides[idx][field] = value;
+        renderForms(); // Re-render to update active buttons
+        updateAllPreviews();
+    }
+
     function updateAllPreviews() {
-        renderPreview(state.currentSlideIndex);
+        renderPreview();
     }
 
     function addSlide() {
         state.slides.push({
-            title: 'Novo Título',
-            text: 'Digite aqui...',
-            image: null,
-            isCover: false
+            title: 'Novo Título', text: 'Conteúdo...', image: null, isCover: false, titleAlign:'center', textAlign:'left'
         });
-        renderTabs();
-        renderForms();
-        switchSlide(state.slides.length - 1);
+        renderTabs(); renderForms(); switchSlide(state.slides.length - 1);
     }
 
     function removeCurrentSlide() {
         if(state.slides.length <= 1) return alert('Mínimo 1 slide!');
         state.slides.splice(state.currentSlideIndex, 1);
         state.currentSlideIndex = Math.max(0, state.currentSlideIndex - 1);
-        renderTabs();
-        renderForms();
-        switchSlide(state.currentSlideIndex);
+        renderTabs(); renderForms(); switchSlide(state.currentSlideIndex);
     }
 
     function handleSlideImageUpload(input, idx) {
@@ -710,55 +713,78 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 state.slides[idx].image = e.target.result;
-                renderForms(); 
-                updateAllPreviews();
+                renderForms(); updateAllPreviews();
             }
             reader.readAsDataURL(input.files[0]);
         }
     }
 
     function removeSlideImage(idx) {
-        state.slides[idx].image = null;
-        renderForms();
-        updateAllPreviews();
+        state.slides[idx].image = null; renderForms(); updateAllPreviews();
     }
 
     async function downloadAll() {
-        // Se estiver no mobile, muda pra aba preview para garantir renderização
-        if(window.innerWidth < 1000) setMobileTab('preview');
-
-        const originalIndex = state.currentSlideIndex;
+        if(window.innerWidth < 1000) setMobileTab('preview'); // Ensure visible
         const btn = document.querySelector('.btn-primary');
-        const originalText = btn.innerHTML;
-        btn.innerHTML = '⏳ Gerando...';
+        btn.innerHTML = '⏳ Baixando...';
         btn.disabled = true;
 
+        // Renderiza UM POR UM para capturar em alta qualidade sem depender do swipe
+        // Esconde o wrapper atual
+        const wrapper = document.getElementById('activePreviewWrapper');
+        wrapper.style.display = 'none';
+
+        // Cria container temporário fora da tela
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.top = '-9999px';
+        document.body.appendChild(tempContainer);
+
         for (let i = 0; i < state.slides.length; i++) {
-            state.currentSlideIndex = i;
-            renderPreview(i);
+            // Renderiza o slide no temp
+            const theme = document.getElementById('globalTheme').value;
+            const format = document.getElementById('globalFormat').value;
+            const name = document.getElementById('globalName').value;
+            const handle = document.getElementById('globalHandle').value;
+            const slide = state.slides[i];
             
-            // Pequeno delay para renderizar imagem
-            await new Promise(r => setTimeout(r, 400)); 
+            const isLast = i === state.slides.length - 1;
+            const arrowHtml = isLast ? '💾' : '➡';
+            const titleSize = slide.isCover ? '2.5em' : '1.8em';
             
-            const element = document.getElementById('render-target');
+            const div = document.createElement('div');
+            div.className = `carousel-slide ${format} ${theme} phone-mockup`;
+            div.innerHTML = `
+                <div class="bg-accent"></div>
+                <div class="slide-content">
+                    <div class="slide-title" style="font-size: ${titleSize}; text-align: ${slide.titleAlign || 'center'}">${slide.title.replace(/\n/g, '<br>')}</div>
+                    <div class="slide-image-container ${slide.image ? 'has-image' : ''}">${slide.image ? `<img src="${slide.image}">` : ''}</div>
+                    <div class="slide-text" style="text-align: ${slide.textAlign || 'left'}">${slide.text.replace(/\n/g, '<br>')}</div>
+                    <div class="slide-footer">
+                        <div class="profile-info"><div class="profile-name">${name}</div><div class="profile-handle">${handle}</div></div>
+                        <div class="arrow-indicator">${arrowHtml}</div>
+                    </div>
+                </div>`;
+            
+            tempContainer.innerHTML = '';
+            tempContainer.appendChild(div);
+
+            await new Promise(r => setTimeout(r, 200)); // Wait images
+
             try {
-                const canvas = await html2canvas(element, {
-                    scale: 3, 
-                    useCORS: true,
-                    backgroundColor: null
-                });
+                const canvas = await html2canvas(div, { scale: 3, useCORS: true, backgroundColor: null });
                 const link = document.createElement('a');
                 link.download = `slide-${i+1}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
-            } catch (err) {
-                console.error(err);
-                alert('Erro slide ' + (i+1));
-            }
+            } catch (err) { console.error(err); }
         }
-        state.currentSlideIndex = originalIndex;
-        renderPreview(originalIndex);
-        btn.innerHTML = originalText;
+
+        document.body.removeChild(tempContainer);
+        wrapper.style.display = window.innerWidth < 1000 ? 'flex' : 'flex'; // Restore
+        updateAllPreviews();
+        
+        btn.innerHTML = '⬇️ Baixar Imagens (HD)';
         btn.disabled = false;
     }
 
