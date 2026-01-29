@@ -2,8 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Studio Delegado AI - V6.1 Final</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Studio Delegado AI - V7 Mobile</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
     <style>
         /* --- RESET & VARS --- */
@@ -18,6 +18,7 @@
             --border: #e0e0e0;
             --radius: 12px;
             --ai-gradient: linear-gradient(135deg, #4285f4, #9b72cb);
+            --mobile-nav-height: 60px;
         }
 
         body {
@@ -25,7 +26,7 @@
             background: #f0f2f5;
             color: var(--text-main);
             height: 100vh;
-            overflow: hidden; 
+            overflow: hidden; /* Desktop trava, Mobile trata diferente */
         }
 
         /* --- LAYOUT --- */
@@ -44,6 +45,8 @@
             display: flex;
             flex-direction: column;
             gap: 2rem;
+            height: 100%;
+            padding-bottom: 100px; /* Espaço extra para mobile nav */
         }
 
         h1 { font-size: 1.4rem; color: var(--blue-police); font-weight: 800; display: flex; align-items: center; gap: 0.5rem; }
@@ -75,14 +78,14 @@
         .btn-ai:hover { opacity: 0.9; transform: scale(0.99); }
         .btn-ai:disabled { opacity: 0.6; cursor: wait; }
 
-        /* CAPTION BOX (NOVO) */
+        /* CAPTION BOX */
         .caption-box {
             background: #fff;
             border: 1px dashed #ccc;
             padding: 1rem;
             border-radius: 8px;
             margin-top: 1rem;
-            display: none; /* Escondido até gerar */
+            display: none;
         }
         .caption-header {
             font-size: 0.8rem; font-weight: 700; color: #555; margin-bottom: 0.5rem;
@@ -147,13 +150,48 @@
             padding: 2rem;
             position: relative;
             overflow: hidden;
+            transition: all 0.3s;
         }
 
         .phone-mockup {
             box-shadow: 0 50px 100px -20px rgba(0,0,0,0.5);
             border-radius: 2px;
             transition: all 0.3s ease;
+            transform-origin: center center;
         }
+
+        /* --- MOBILE NAVIGATION --- */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: var(--mobile-nav-height);
+            background: white;
+            border-top: 1px solid #ddd;
+            z-index: 1000;
+            box-shadow: 0 -5px 10px rgba(0,0,0,0.05);
+        }
+        
+        .mobile-nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: #888;
+            cursor: pointer;
+        }
+        
+        .mobile-nav-btn.active {
+            color: var(--blue-police);
+            background: #f0f7ff;
+        }
+        
+        .mobile-nav-btn span { font-size: 1.2rem; margin-bottom: 2px; }
 
         /* --- CAROUSEL STYLES --- */
         .carousel-slide {
@@ -211,10 +249,46 @@
         .format-45 { width: 500px; height: 625px; font-size: 15px; }
         .format-11 { width: 600px; height: 600px; font-size: 14px; }
 
-        /* Responsive */
+        /* RESPONSIVE & MOBILE FIXES */
         @media (max-width: 1000px) {
-            .app-container { grid-template-columns: 1fr; overflow-y: auto; }
-            .preview-area { min-height: 80vh; }
+            body { overflow: hidden; } /* Previne scroll no body */
+            .app-container { 
+                grid-template-columns: 1fr; 
+                height: calc(100vh - var(--mobile-nav-height)); /* Desconta a barra */
+                overflow: hidden;
+            }
+            
+            /* Habilitar Mobile Nav */
+            .mobile-nav { display: flex; }
+
+            /* Painéis funcionam como abas */
+            .editor-sidebar { 
+                width: 100%; 
+                position: absolute; top: 0; left: 0; 
+                z-index: 10; 
+                display: flex; /* Flexbox para scroll funcionar */
+                padding-bottom: 80px; /* Mais espaço pra scroll */
+            }
+            
+            .preview-area { 
+                width: 100%; height: 100%;
+                position: absolute; top: 0; left: 0; 
+                z-index: 5;
+                display: none; /* Escondido por padrão */
+                padding: 1rem;
+            }
+
+            /* Quando ativo */
+            .show-editor .editor-sidebar { display: flex; z-index: 20; }
+            .show-editor .preview-area { display: none; }
+            
+            .show-preview .preview-area { display: flex; z-index: 20; }
+            .show-preview .editor-sidebar { display: none; }
+
+            /* Zoom no preview para caber na tela */
+            #render-target {
+                transform: scale(0.65); /* Reduz slide pra caber */
+            }
         }
         
         .status-message {
@@ -223,13 +297,11 @@
         .status-error { background: #fee; color: #c00; display: block; }
     </style>
 </head>
-<body>
-
-<div class="app-container">
-    <div class="editor-sidebar">
+<body class="show-editor"> <div class="app-container">
+    <div class="editor-sidebar" id="editorPanel">
         <div>
             <h1>⚖️ Studio Delegado AI</h1>
-            <p style="font-size: 0.8rem; color: #777;">Versão 6.1 - Final Full Stack</p>
+            <p style="font-size: 0.8rem; color: #777;">V7.0 Mobile - Use as abas abaixo</p>
         </div>
 
         <div class="ai-box">
@@ -257,17 +329,17 @@
                     <option value="10">10 pág</option>
                 </select>
                 <button class="btn-ai" onclick="generateWithGeminiOptimized()" id="btnGenerate">
-                    <span>⚡ Gerar & Legendar</span>
+                    <span>⚡ Gerar IA</span>
                 </button>
             </div>
             <div id="aiStatus" class="status-message"></div>
 
             <div id="generatedCaptionBox" class="caption-box">
                 <div class="caption-header">
-                    📝 Legenda Sugerida
-                    <button class="btn-sm" onclick="copyCaption()">📋 Copiar</button>
+                    📝 Legenda
+                    <button class="btn-sm" onclick="copyCaption()">Copiar</button>
                 </div>
-                <textarea id="captionText" style="height: 120px; font-size: 0.8rem; color: #555;" readonly></textarea>
+                <textarea id="captionText" style="height: 100px; font-size: 0.8rem; color: #555;" readonly></textarea>
             </div>
         </div>
 
@@ -311,21 +383,32 @@
                 </div>
 
             <div style="display: flex; gap: 10px; margin-top: 1rem;">
-                <button class="btn btn-secondary" onclick="addSlide()" style="flex:1;">+ Novo Slide</button>
+                <button class="btn btn-secondary" onclick="addSlide()" style="flex:1;">+ Novo</button>
                 <button class="btn btn-danger" onclick="removeCurrentSlide()">Remover</button>
             </div>
         </div>
 
         <div class="settings-group">
             <button class="btn btn-primary" onclick="downloadAll()">
-                ⬇️ Baixar Todos os Slides (HD)
+                ⬇️ Baixar Imagens (HD)
             </button>
         </div>
     </div>
 
-    <div class="preview-area">
+    <div class="preview-area" id="previewPanel">
         <div id="activePreviewWrapper">
             </div>
+    </div>
+</div>
+
+<div class="mobile-nav">
+    <div class="mobile-nav-btn active" onclick="setMobileTab('editor')" id="tabEditor">
+        <span>✏️</span>
+        Editar
+    </div>
+    <div class="mobile-nav-btn" onclick="setMobileTab('preview')" id="tabPreview">
+        <span>👁️</span>
+        Ver Arte
     </div>
 </div>
 
@@ -334,16 +417,38 @@
     // --- STATE ---
     let state = {
         currentSlideIndex: 0,
-        caption: '', // Armazena a legenda
+        caption: '', 
         slides: [
             {
                 title: 'STUDIO DELEGADO AI',
-                text: 'Geração de Slides + Legenda + Hashtags. Layout limpo e seletor de 1 a 10 páginas.',
+                text: 'Layout Mobile 100% Funcional! Use as abas no rodapé para alternar entre editar e ver a arte.',
                 image: null,
                 isCover: true
             }
         ]
     };
+
+    // --- MOBILE TAB LOGIC ---
+    function setMobileTab(tab) {
+        const body = document.body;
+        const btnEditor = document.getElementById('tabEditor');
+        const btnPreview = document.getElementById('tabPreview');
+
+        if (tab === 'editor') {
+            body.classList.add('show-editor');
+            body.classList.remove('show-preview');
+            btnEditor.classList.add('active');
+            btnPreview.classList.remove('active');
+        } else {
+            body.classList.remove('show-editor');
+            body.classList.add('show-preview');
+            btnEditor.classList.remove('active');
+            btnPreview.classList.add('active');
+            
+            // Força atualização do preview ao entrar na aba
+            updateAllPreviews();
+        }
+    }
 
     // --- INITIALIZATION ---
     function init() {
@@ -370,21 +475,20 @@
         localStorage.setItem('gemini_api_key', apiKey);
 
         btn.disabled = true;
-        btn.innerHTML = '⚡ Escrevendo legenda e slides...';
+        btn.innerHTML = '⚡ Criando...';
         status.style.display = 'block';
         status.className = 'status-message';
         status.style.background = '#e2e3e5';
         status.style.color = '#383d41';
-        status.innerHTML = 'Conectando ao modo gratuito (Flash)...';
-        captionBox.style.display = 'none'; // Esconde anterior
+        status.innerHTML = 'Conectando (Modo Flash)...';
+        captionBox.style.display = 'none';
 
         try {
-            // LISTAR MODELOS
             const listResponse = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             if (!listResponse.ok) {
                 const err = await listResponse.json();
-                if(JSON.stringify(err).includes('quota')) throw new Error("Cota excedida. Aguarde 1 minuto.");
-                throw new Error(`Falha de conexão: ${err.error?.message}`);
+                if(JSON.stringify(err).includes('quota')) throw new Error("Cota excedida. Aguarde 1 min.");
+                throw new Error(`Conexão falhou: ${err.error?.message}`);
             }
 
             const listData = await listResponse.json();
@@ -393,23 +497,21 @@
             if (!selectedModel) selectedModel = availableModels.find(m => m.name.includes('flash'));
             if (!selectedModel) selectedModel = availableModels[0];
 
-            if (!selectedModel) throw new Error("Nenhum modelo disponível.");
+            if (!selectedModel) throw new Error("Sem modelos disponíveis.");
             const modelName = selectedModel.name;
-            status.innerHTML = `✅ Modelo: <strong>${modelName.replace('models/', '')}</strong>. Criando conteúdo...`;
+            status.innerHTML = `✅ Gerando via IA...`;
 
-            // PROMPT OTIMIZADO PARA RETORNAR OBJETO {slides, caption}
             const systemPrompt = `
-            Você é um Delegado de Polícia especialista em asssunto Jurídico.
+            Você é um Delegado especialista em Marketing.
             Tarefa 1: Crie ${slideCount} slides sobre: "${promptText}".
-            Tarefa 2: Crie uma legenda para Instagram sobre esse tema. Use tom de autoridade, gatilhos mentais e inclua 10 hashtags relevantes.
-            
-            Retorne APENAS um JSON válido com esta estrutura exata:
+            Tarefa 2: Crie legenda Insta com hashtags.
+            Retorne APENAS JSON:
             {
               "slides": [
                 {"title": "...", "text": "...", "isCover": true},
                 {"title": "...", "text": "...", "isCover": false}
               ],
-              "caption": "Escreva a legenda aqui... #hashtags"
+              "caption": "Legenda... #hashtags"
             }
             `;
 
@@ -421,24 +523,18 @@
 
             if (!genResponse.ok) {
                 const errGen = await genResponse.json();
-                if(JSON.stringify(errGen).includes('quota')) {
-                    throw new Error("Limite de velocidade. Aguarde 10s.");
-                }
-                throw new Error(`Erro na geração: ${errGen.error?.message}`);
+                if(JSON.stringify(errGen).includes('quota')) throw new Error("Limite atingido. Aguarde 10s.");
+                throw new Error(`Erro API: ${errGen.error?.message}`);
             }
 
             const genData = await genResponse.json();
             let rawText = genData.candidates[0].content.parts[0].text;
-            // Limpeza agressiva do JSON
             rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();
             
             const result = JSON.parse(rawText);
+            const newSlides = result.slides || result; 
+            const newCaption = result.caption || "Legenda não gerada.";
 
-            // Validar estrutura
-            const newSlides = result.slides || result; // Fallback se a IA esquecer o caption
-            const newCaption = result.caption || "Legenda não gerada automaticamente.";
-
-            // Atualizar Estado
             state.slides = Array.isArray(newSlides) ? newSlides.map(s => ({
                 title: s.title || 'Título',
                 text: s.text || 'Texto...',
@@ -448,19 +544,24 @@
 
             state.caption = newCaption;
 
-            // Renderizar
             state.currentSlideIndex = 0;
             renderTabs();
             renderForms();
             updateAllPreviews();
 
-            // Mostrar Legenda
             document.getElementById('captionText').value = state.caption;
             captionBox.style.display = 'block';
 
             status.style.background = '#d4edda';
             status.style.color = '#155724';
-            status.innerHTML = `✅ Sucesso! Slides e Legenda criados.`;
+            status.innerHTML = `✅ Sucesso!`;
+
+            // No mobile, sugere ver o preview
+            if(window.innerWidth < 1000) {
+                if(confirm("Conteúdo gerado! Ir para 'Ver Arte' agora?")) {
+                    setMobileTab('preview');
+                }
+            }
 
         } catch (error) {
             console.error(error);
@@ -468,16 +569,15 @@
             status.innerHTML = `❌ Erro: ${error.message}`;
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '⚡ Gerar & Legendar';
+            btn.innerHTML = '⚡ Gerar IA';
         }
     }
 
-    // --- CAPTION UTILS ---
     function copyCaption() {
         const captionText = document.getElementById('captionText');
         captionText.select();
         document.execCommand('copy');
-        alert('Legenda copiada para a área de transferência!');
+        alert('Copiado!');
     }
 
     // --- RENDER FUNCTIONS ---
@@ -508,10 +608,10 @@
                 <div class="input-group">
                     <label>Imagem de Destaque (Opcional)</label>
                     <div class="file-upload-wrapper">
-                        <button class="file-upload-btn">${slide.image ? '✅ Imagem Carregada (Clique para trocar)' : '📁 Adicionar Print/Foto'}</button>
+                        <button class="file-upload-btn">${slide.image ? '✅ Imagem OK' : '📁 Adicionar Foto'}</button>
                         <input type="file" accept="image/*" onchange="handleSlideImageUpload(this, ${idx})">
                     </div>
-                    ${slide.image ? `<button onclick="removeSlideImage(${idx})" style="margin-top:5px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer;">Remover Imagem</button>` : ''}
+                    ${slide.image ? `<button onclick="removeSlideImage(${idx})" style="margin-top:5px; font-size:0.7rem; color:red; border:none; background:none; cursor:pointer;">Remover</button>` : ''}
                 </div>
 
                 <div class="input-group">
@@ -560,7 +660,6 @@
         `;
     }
 
-    // --- LOGIC HANDLERS ---
     function switchSlide(idx) {
         state.currentSlideIndex = idx;
         renderTabs();
@@ -588,7 +687,7 @@
     function addSlide() {
         state.slides.push({
             title: 'Novo Título',
-            text: 'Digite seu conteúdo aqui...',
+            text: 'Digite aqui...',
             image: null,
             isCover: false
         });
@@ -598,7 +697,7 @@
     }
 
     function removeCurrentSlide() {
-        if(state.slides.length <= 1) return alert('Você precisa de pelo menos 1 slide!');
+        if(state.slides.length <= 1) return alert('Mínimo 1 slide!');
         state.slides.splice(state.currentSlideIndex, 1);
         state.currentSlideIndex = Math.max(0, state.currentSlideIndex - 1);
         renderTabs();
@@ -625,16 +724,21 @@
     }
 
     async function downloadAll() {
+        // Se estiver no mobile, muda pra aba preview para garantir renderização
+        if(window.innerWidth < 1000) setMobileTab('preview');
+
         const originalIndex = state.currentSlideIndex;
         const btn = document.querySelector('.btn-primary');
         const originalText = btn.innerHTML;
-        btn.innerHTML = '⏳ Gerando imagens...';
+        btn.innerHTML = '⏳ Gerando...';
         btn.disabled = true;
 
         for (let i = 0; i < state.slides.length; i++) {
             state.currentSlideIndex = i;
             renderPreview(i);
-            await new Promise(r => setTimeout(r, 300)); 
+            
+            // Pequeno delay para renderizar imagem
+            await new Promise(r => setTimeout(r, 400)); 
             
             const element = document.getElementById('render-target');
             try {
@@ -644,12 +748,12 @@
                     backgroundColor: null
                 });
                 const link = document.createElement('a');
-                link.download = `carrossel-slide-${i+1}.png`;
+                link.download = `slide-${i+1}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
             } catch (err) {
                 console.error(err);
-                alert('Erro ao gerar slide ' + (i+1));
+                alert('Erro slide ' + (i+1));
             }
         }
         state.currentSlideIndex = originalIndex;
